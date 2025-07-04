@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-// import { getRankTierImage } from '../utils/imageUtils'; // Removed import
+import { getRankTierImage } from '../utils/imageUtils'; // Re-enabled import
+import { PlayMode } from '../types';
 
 interface UserData {
   user: {
@@ -43,21 +44,36 @@ function UserProfile() {
     const fetchUserData = async () => {
       try {
         // Fetch user number and basic info
-        const userResponse = await axios.get(`http://localhost:5000/api/user/${nickname}`);
+        const userResponse = await axios.get(
+          `${window.location.protocol}//${window.location.hostname}:5000/api/user/${nickname}`
+        );
         const userNum = userResponse.data.user.userNum;
         setUserData(userResponse.data);
 
-        // Fetch user rank (using default seasonId and matchingTeamMode for now)
-        // You might want to let the user select these in the future
-        const rankResponse = await axios.get(`http://localhost:5000/api/user/${userNum}/rank/0/1`); // seasonId: 0 (Normal), matchingTeamMode: 1 (Solo)
+        // Fetch current season ID
+        const seasonResponse = await axios.get(
+          `${window.location.protocol}//${window.location.hostname}:5000/api/season`
+        );
+        const currentSeason = seasonResponse.data.data.find(
+          (season: any) => season.isCurrent === 1
+        );
+        const currentSeasonId = currentSeason ? currentSeason.seasonID : 0;
+
+        // Fetch user rank using current season ID
+        const rankResponse = await axios.get(
+          `${window.location.protocol}//${window.location.hostname}:5000/api/user/${userNum}/rank/${currentSeasonId}/3`
+        ); // matchingTeamMode: 1 (Solo)
         setUserRank(rankResponse.data);
 
         // Fetch user games
-        const gamesResponse = await axios.get(`http://localhost:5000/api/user/${userNum}/games`);
+        const gamesResponse = await axios.get(
+          `${window.location.protocol}//${window.location.hostname}:5000/api/user/${userNum}/games`
+        );
         setUserGames(gamesResponse.data.userGames);
-
       } catch (err) {
-        setError('Failed to fetch user data. Please check the nickname and try again.');
+        setError(
+          'Failed to fetch user data. Please check the nickname and try again.'
+        );
         console.error(err);
       } finally {
         setLoading(false);
@@ -80,35 +96,68 @@ function UserProfile() {
   }
 
   return (
-    <div className="mt-5">
-      <h2 className="mb-4">User Profile: {userData.user.nickname}</h2>
-      <p>User Number: {userData.user.userNum}</p>
+    <div className="user-profile-container mt-5">
+      <div className="profile-header">
+        <h2 className="nickname">{userData.user.nickname}</h2>
+        <Link to="/" className="btn btn-secondary mt-3">
+          홈으로 돌아가기
+        </Link>
+      </div>
 
       {userRank && userRank.userRank && (
-        <div className="mt-4">
-          <h3>Rank Information</h3>
-          {/* Removed rank image display */}
-          <p>MMR: {userRank.userRank.mmr}</p>
-          <p>Rank: {userRank.userRank.rank}</p>
-          <p>Rank Percent: {(userRank.userRank.rankPercent * 100).toFixed(2)}%</p>
-          {/* Add more rank details as needed */}
+        <div className="rank-info-section card mt-4">
+          <div className="card-body">
+            <h3 className="card-title">랭크 정보</h3>
+            <div className="rank-details">
+              <img
+                src={getRankTierImage(
+                  userRank.userRank.mmr,
+                  userRank.userRank.rank
+                )} // Use getRankTierImage
+                alt="티어"
+                className="rank-tier-image"
+                width={100}
+              />
+              <div className="rank-text">
+                <p>MMR: {userRank.userRank.mmr}</p>
+                <p>Rank: {userRank.userRank.rank}</p>
+                <p>
+                  Rank Percent:{' '}
+                  {(userRank.userRank.rankPercent * 100).toFixed(2)}%
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
-      <div className="mt-4">
-        <h3>Recent Games</h3>
-        {userGames.length > 0 ? (
-          <ul className="list-group">
-            {userGames.map((game) => (
-              <li key={game.gameId} className="list-group-item">
-                Game ID: {game.gameId} - Mode: {game.matchingMode} - Team Mode: {game.matchingTeamMode}
-                <Link to={`/match/${game.gameId}`} className="btn btn-info btn-sm float-end">View Details</Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No recent games found.</p>
-        )}
+      <div className="recent-games-section card mt-4">
+        <div className="card-body">
+          <h3 className="card-title">Recent Games</h3>
+          {userGames.length > 0 ? (
+            <ul className="list-group">
+              {userGames.map((game) => (
+                <li
+                  key={game.gameId}
+                  className="list-group-item d-flex justify-content-between align-items-center"
+                >
+                  <div>
+                    Game ID: {game.gameId} - Mode: {PlayMode[game.matchingMode]}{' '}
+                    - Team Mode: {game.matchingTeamMode}
+                  </div>
+                  <Link
+                    to={`/match/${game.gameId}`}
+                    className="btn btn-info btn-sm"
+                  >
+                    View Details
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No recent games found.</p>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { getCharacterImage, getItemImage } from '../utils/imageUtils';
+
+
 
 interface MatchData {
   code: number;
@@ -15,12 +16,14 @@ function MatchDetail() {
   const [matchData, setMatchData] = useState<MatchData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [characterImageUrls, setCharacterImageUrls] = useState<{ [key: number]: string }>({});
+  const [characterImageUrls, setCharacterImageUrls] = useState<{
+    [key: number]: string;
+  }>({});
 
   useEffect(() => {
     const fetchMatchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/games/${gameId}`);
+        const response = await axios.get(`${window.location.protocol}//${window.location.hostname}:5000/api/games/${gameId}`);
         setMatchData(response.data);
 
         // Fetch character images for each player
@@ -32,7 +35,6 @@ function MatchDetail() {
           }
         }
         setCharacterImageUrls(imageUrls);
-
       } catch (err) {
         setError('Failed to fetch match data.');
         console.error(err);
@@ -68,7 +70,9 @@ function MatchDetail() {
             <p className="card-text">Assists: {player.playerAssistant}</p>
             <p className="card-text">Monster Kills: {player.monsterKill}</p>
             <p className="card-text">Matching Mode: {player.matchingMode}</p>
-            <p className="card-text">Matching Team Mode: {player.matchingTeamMode}</p>
+            <p className="card-text">
+              Matching Team Mode: {player.matchingTeamMode}
+            </p>
 
             {/* Character Image */}
             {player.characterNum && characterImageUrls[player.characterNum] && (
@@ -94,7 +98,11 @@ function MatchDetail() {
                         key={itemCode} // Use itemCode as key for uniqueness
                         src={getItemImage(itemCode)}
                         alt={`Item ${itemCode}`}
-                        style={{ width: '40px', height: '40px', marginRight: '5px' }}
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          marginRight: '5px',
+                        }}
                       />
                     ) : null;
                   })}

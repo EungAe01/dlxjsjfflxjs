@@ -23,6 +23,7 @@ function Home() {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
               <Nav.Link href="/">홈</Nav.Link>
+              <Nav.Link href="/news">뉴스</Nav.Link>
               <Nav.Link href="/characters">캐릭터</Nav.Link>
               <Nav.Link href="/items">아이템</Nav.Link>
             </Nav>
@@ -43,7 +44,7 @@ function Home() {
 
       <Container className="my-4">
         <h1 className="text-center mb-4">ER.GG에 오신 것을 환영합니다!</h1>
-        <p className="text-center">이터널 리턴 통계 및 정보를 위한 최고의 리소스입니다.</p>
+        <p className="text-center">절망의 끝에 선 폰에게 모든 영광을.</p>
 
         {/* Placeholder for main content sections */}
         <div className="row mt-5">
@@ -52,7 +53,7 @@ function Home() {
               <div className="card-body">
                 <h5 className="card-title">최신 뉴스</h5>
                 <p className="card-text">최신 패치, 이벤트 및 공지사항을 확인하세요.</p>
-                <Button variant="primary">더 보기</Button>
+                <Button variant="primary" onClick={() => navigate('/news')}>더 보기</Button>
               </div>
             </div>
           </div>
@@ -82,7 +83,7 @@ function Home() {
 
       <footer className="bg-dark text-white text-center py-3 mt-5">
         <Container>
-          <p>&copy; {new Date().getFullYear()} ER.GG. 모든 권리 보유.</p>
+          <p>&copy; {new Date().getFullYear()} ER.GG. All rights reserved.</p>
         </Container>
       </footer>
     </>

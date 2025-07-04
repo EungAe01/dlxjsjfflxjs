@@ -2,6 +2,12 @@
   text-align: center;
 }
 
+.container {
+  max-width: 1200px; /* Adjust as needed */
+  margin: 0 auto; /* Center the container */
+  padding: 20px; /* Add some padding */
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -14,12 +20,11 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #1c1c1e;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
 }
@@ -35,4 +40,82 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* UserProfile specific styles */
+.user-profile-container {
+  max-width: 960px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #2a2a2a; /* Dark background for the profile area */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #444;
+}
+
+.nickname {
+  font-size: 2.5rem;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.rank-info-section,
+.recent-games-section {
+  background-color: #333333; /* Slightly lighter dark for sections */
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.rank-info-section .card-title,
+.recent-games-section .card-title {
+  color: #ffffff;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+}
+
+.rank-details {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.rank-tier-image {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.rank-text p {
+  margin: 5px 0;
+  color: #e0e0e0;
+  font-size: 1.1rem;
+}
+
+.list-group-item {
+  background-color: #444444; /* Darker list item background */
+  border-color: #555555;
+  color: #e0e0e0;
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+
+.list-group-item:last-child {
+  margin-bottom: 0;
+}
+
+.btn-info {
+  background-color: #007bff; /* Bootstrap info blue */
+  border-color: #007bff;
+}
+
+.btn-info:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
 }
