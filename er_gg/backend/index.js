@@ -67,13 +67,11 @@ app.get('/api/user/:nickname', async (req, res) => {
       'Error fetching user number:',
       error.response ? error.response.data : error.message
     );
-    res
-      .status(error.response ? error.response.status : 500)
-      .json({
-        message: error.response
-          ? error.response.data.message
-          : 'Internal Server Error',
-      });
+    res.status(error.response ? error.response.status : 500).json({
+      message: error.response
+        ? error.response.data.message
+        : 'Internal Server Error',
+    });
   }
 });
 
@@ -81,7 +79,7 @@ app.get('/api/user/:nickname', async (req, res) => {
 app.get('/api/user/:userNum/games', async (req, res) => {
   const { userNum } = req.params;
   try {
-    const response = await axios.get(
+    const gamesResponse = await axios.get(
       `${API_BASE_URL}/v1/user/games/${userNum}`,
       {
         headers: {
@@ -89,19 +87,59 @@ app.get('/api/user/:userNum/games', async (req, res) => {
         },
       }
     );
-    res.json(response.data);
+
+    const userGames = gamesResponse.data.userGames;
+
+    if (!userGames || userGames.length === 0) {
+      return res.json({ userGames: [] });
+    }
+
+    const gamesWithMmr = await Promise.all(
+      userGames.map(async (game) => {
+        try {
+          const gameDetailsResponse = await axios.get(
+            `${API_BASE_URL}/v1/games/${game.gameId}`,
+            {
+              headers: {
+                'x-api-key': BSER_API_KEY,
+              },
+            }
+          );
+
+          const playerGameInfo = gameDetailsResponse.data.userGames.find(
+            (userGame) => userGame.userNum === parseInt(userNum, 10)
+          );
+
+          return {
+            ...game,
+            mmr: playerGameInfo ? playerGameInfo.mmrAfter : null,
+            mmrChange: playerGameInfo ? playerGameInfo.mmrGain : null,
+          };
+        } catch (error) {
+          console.error(
+            `Error fetching details for game ${game.gameId}:`,
+            error.response ? error.response.data : error.message
+          );
+          return {
+            ...game,
+            mmr: null,
+            mmrChange: null,
+          };
+        }
+      })
+    );
+
+    res.json({ userGames: gamesWithMmr });
   } catch (error) {
     console.error(
       'Error fetching user games:',
       error.response ? error.response.data : error.message
     );
-    res
-      .status(error.response ? error.response.status : 500)
-      .json({
-        message: error.response
-          ? error.response.data.message
-          : 'Internal Server Error',
-      });
+    res.status(error.response ? error.response.status : 500).json({
+      message: error.response
+        ? error.response.data.message
+        : 'Internal Server Error',
+    });
   }
 });
 
@@ -120,13 +158,11 @@ app.get('/api/games/:gameId', async (req, res) => {
       'Error fetching match results:',
       error.response ? error.response.data : error.message
     );
-    res
-      .status(error.response ? error.response.status : 500)
-      .json({
-        message: error.response
-          ? error.response.data.message
-          : 'Internal Server Error',
-      });
+    res.status(error.response ? error.response.status : 500).json({
+      message: error.response
+        ? error.response.data.message
+        : 'Internal Server Error',
+    });
   }
 });
 
@@ -150,13 +186,11 @@ app.get(
         'Error fetching user rank:',
         error.response ? error.response.data : error.message
       );
-      res
-        .status(error.response ? error.response.status : 500)
-        .json({
-          message: error.response
-            ? error.response.data.message
-            : 'Internal Server Error',
-        });
+      res.status(error.response ? error.response.status : 500).json({
+        message: error.response
+          ? error.response.data.message
+          : 'Internal Server Error',
+      });
     }
   }
 );
@@ -186,19 +220,47 @@ app.get('/api/season', async (req, res) => {
       'Error fetching season data:',
       error.response ? error.response.data : error.message
     );
-    res
-      .status(error.response ? error.response.status : 500)
-      .json({
-        message: error.response
-          ? error.response.data.message
-          : 'Internal Server Error',
-      });
+    res.status(error.response ? error.response.status : 500).json({
+      message: error.response
+        ? error.response.data.message
+        : 'Internal Server Error',
+    });
   }
 });
 
-const newsRouter = require('./news');
+app.get('/api/news', async (req, res) => {
+  try {
+    const { type = 'news' } = req.query; // Default to 'news' if no type is provided
+    const apiUrl = `https://playeternalreturn.com/api/v1/posts/news?category=${type}&page=1&hl=ko_KR`;
+    const { data } = await axios.get(apiUrl);
 
-app.use('/api/news', newsRouter);
+    let newsArray = data.articles;
+
+    console.log(newsArray);
+
+    const news = newsArray.map((item) => ({
+      title: item.i18ns.ko_KR.title,
+      summary: item.i18ns.ko_KR.summary || '',
+      createdAt: item.created_at,
+      url: item.url,
+      thumbnailUrl: item.thumbnail_url || '',
+      id: item.id,
+      viewCount: item.view_count,
+      isPinned: item.is_pinned,
+    }));
+
+    console.log(news);
+    console.log('응애바보');
+
+    res.json(news);
+  } catch (error) {
+    console.error(
+      `Error fetching ${req.query.type || 'news'} from API:`,
+      error.message
+    ); // Log the error
+    res.status(500).json({ message: 'Error fetching news' });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

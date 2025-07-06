@@ -9,8 +9,6 @@ router.get('/', async (req, res) => {
     const apiUrl = `https://playeternalreturn.com/api/v1/posts/${type}?page=1`;
     const { data } = await axios.get(apiUrl);
 
-    console.log('Full API response:', data); // Log the full API response
-
     let newsArray = [];
 
     // Check for common nesting patterns or assume data is the array
@@ -22,7 +20,9 @@ router.get('/', async (req, res) => {
       newsArray = data;
     } else {
       console.error('Unexpected API response format:', data);
-      return res.status(500).json({ message: 'Unexpected API response format' });
+      return res
+        .status(500)
+        .json({ message: 'Unexpected API response format' });
     }
 
     const news = newsArray.map((item) => ({
@@ -34,7 +34,10 @@ router.get('/', async (req, res) => {
 
     res.json(news);
   } catch (error) {
-    console.error(`Error fetching ${req.query.type || 'news'} from API:`, error.message); // Log the error
+    console.error(
+      `Error fetching ${req.query.type || 'news'} from API:`,
+      error.message
+    ); // Log the error
     res.status(500).json({ message: 'Error fetching news' });
   }
 });

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import { getRankTierImage } from '../utils/imageUtils'; // Re-enabled import
-import { PlayMode } from '../types';
+import { getRankTierImage, getCharacterSkinImage } from '../utils/imageUtils';
+import { PlayMode, PlayModeKR } from '../types';
 
 interface UserData {
   user: {
@@ -29,6 +29,11 @@ interface UserGame {
   matchingMode: number;
   matchingTeamMode: number;
   seasonId: number;
+  mmr: number | null;
+  mmrChange: number | null;
+  gameRank: number | null;
+  characterNum: number | null;
+  startDtm: string;
   // Add more fields as needed from the API response
 }
 
@@ -39,6 +44,9 @@ function UserProfile() {
   const [userGames, setUserGames] = useState<UserGame[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [characterImageUrls, setCharacterImageUrls] = useState<{
+    [key: number]: string;
+  }>({});
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -70,6 +78,19 @@ function UserProfile() {
           `${window.location.protocol}//${window.location.hostname}:5000/api/user/${userNum}/games`
         );
         setUserGames(gamesResponse.data.userGames);
+
+        // Fetch character images for each game
+        const imageUrls: { [key: number]: string } = {};
+        for (const game of gamesResponse.data.userGames) {
+          if (game.characterNum && !imageUrls[game.characterNum]) {
+            const imageUrl = await getCharacterSkinImage(
+              game.characterNum,
+              Number(String(game.skinCode).slice(-3))
+            );
+            imageUrls[game.characterNum] = imageUrl;
+          }
+        }
+        setCharacterImageUrls(imageUrls);
       } catch (err) {
         setError(
           'Failed to fetch user data. Please check the nickname and try again.'
@@ -99,9 +120,6 @@ function UserProfile() {
     <div className="user-profile-container mt-5">
       <div className="profile-header">
         <h2 className="nickname">{userData.user.nickname}</h2>
-        <Link to="/" className="btn btn-secondary mt-3">
-          홈으로 돌아가기
-        </Link>
       </div>
 
       {userRank && userRank.userRank && (
@@ -121,10 +139,7 @@ function UserProfile() {
               <div className="rank-text">
                 <p>MMR: {userRank.userRank.mmr}</p>
                 <p>Rank: {userRank.userRank.rank}</p>
-                <p>
-                  Rank Percent:{' '}
-                  {(userRank.userRank.rankPercent * 100).toFixed(2)}%
-                </p>
+                <p>Rank Percent: {userRank.userRank.rankPercent}</p>
               </div>
             </div>
           </div>
@@ -141,9 +156,75 @@ function UserProfile() {
                   key={game.gameId}
                   className="list-group-item d-flex justify-content-between align-items-center"
                 >
-                  <div>
-                    Game ID: {game.gameId} - Mode: {PlayMode[game.matchingMode]}{' '}
-                    - Team Mode: {game.matchingTeamMode}
+                  <div className="d-flex align-items-center">
+                    <div>
+                      <div>
+                        {game.matchingMode === 6 ? (
+                          <span
+                            style={{
+                              fontSize: '1.25rem',
+                              fontWeight: 'bold',
+                              color: game.gameRank === 1 ? 'green' : 'red',
+                            }}
+                          >
+                            {game.gameRank === 1 ? '승리' : '패배'}
+                          </span>
+                        ) : (
+                          game.gameRank != null && (
+                            <span
+                              style={{
+                                fontSize: '1.25rem',
+                                fontWeight: 'bold',
+                              }}
+                            >
+                              #{game.gameRank}
+                            </span>
+                          )
+                        )}
+                      </div>
+                      <div>{PlayModeKR[game.matchingMode]}</div>
+                      <div>{game.startDtm}</div>
+                    </div>
+
+                    {game.characterNum &&
+                      characterImageUrls[game.characterNum] && (
+                        <img
+                          src={characterImageUrls[game.characterNum]}
+                          alt={`Character ${game.characterNum}`}
+                          style={{
+                            width: '50px',
+                            height: '50px',
+                            marginRight: '10px',
+                            objectFit: 'cover',
+                            aspectRatio: '1 / 1',
+                            borderRadius: '100%',
+                            backgroundColor: '#f0f0f0',
+                            border: '1px solid #ccc',
+                          }}
+                        />
+                      )}
+                    <div>
+                      Game ID: {game.gameId}
+                      {game.mmr != null && (
+                        <div>
+                          MMR: {game.mmr}{' '}
+                          {game.mmrChange != null && (
+                            <span
+                              className={
+                                game.mmrChange > 0
+                                  ? 'text-success'
+                                  : game.mmrChange < 0
+                                  ? 'text-danger'
+                                  : 'text-secondary'
+                              }
+                            >
+                              ({game.mmrChange > 0 ? '+' : ''}
+                              {game.mmrChange})
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <Link
                     to={`/match/${game.gameId}`}

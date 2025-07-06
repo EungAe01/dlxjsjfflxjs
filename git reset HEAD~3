@@ -1,0 +1,21 @@
+[33mcommit 1d0612fbcab494a506c64c5bebd1cdf687b1a342[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: EungAe01 <minjun_jo@naver.com>
+Date:   Fri Jul 4 00:11:04 2025 +0900
+
+    feat: initialize frontend with React, TypeScript, and Bootstrap
+    
+    - Added package.json with dependencies for React, TypeScript, and testing libraries.
+    - Created public assets including favicon, logos, and manifest for PWA support.
+    - Implemented main application structure with App component and routing.
+    - Developed Home, UserProfile, and MatchDetail components for user interaction.
+    - Integrated axios for API calls to fetch user and match data.
+    - Added utility functions for fetching character and item images.
+    - Set up basic styling with App.css and index.css.
+    - Configured TypeScript settings in tsconfig.json.
+    - Included testing setup with Jest and React Testing Library.
+
+[33mcommit 3e2de6aaf6d3b856c966bdc15e3df3d6266061b2[m
+Author: EungAe01 <minjun_jo@naver.com>
+Date:   Thu Jul 3 23:55:18 2025 +0900
+
+    first commit
