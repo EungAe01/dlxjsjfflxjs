@@ -195,6 +195,57 @@ app.get(
   }
 );
 
+app.get('/api/user/:userNum/stats/:seasonId', async (req, res) => {
+  const { userNum, seasonId } = req.params;
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/v1/user/stats/${userNum}/${seasonId}`,
+      {
+        headers: {
+          'x-api-key': BSER_API_KEY,
+        },
+      }
+    );
+    res.json(response.data);
+  } catch (error) {
+    console.error(
+      'Error fetching user rank:',
+      error.response ? error.response.data : error.message
+    );
+    res.status(error.response ? error.response.status : 500).json({
+      message: error.response
+        ? error.response.data.message
+        : 'Internal Server Error',
+    });
+  }
+});
+
+// Get User Stats (New)
+app.get('/api/user/:userNum/stats/:seasonId', async (req, res) => {
+  const { userNum, seasonId } = req.params;
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/v1/user/stats/${userNum}/${seasonId}`,
+      {
+        headers: {
+          'x-api-key': BSER_API_KEY,
+        },
+      }
+    );
+    res.json(response.data);
+  } catch (error) {
+    console.error(
+      'Error fetching user stats:',
+      error.response ? error.response.data : error.message
+    );
+    res.status(error.response ? error.response.status : 500).json({
+      message: error.response
+        ? error.response.data.message
+        : 'Internal Server Error',
+    });
+  }
+});
+
 // New: Get character name by code
 app.get('/api/character-name/:characterCode', (req, res) => {
   const { characterCode } = req.params;
@@ -231,7 +282,8 @@ app.get('/api/season', async (req, res) => {
 app.get('/api/news', async (req, res) => {
   try {
     const { type = 'news' } = req.query; // Default to 'news' if no type is provided
-    const apiUrl = `https://playeternalreturn.com/api/v1/posts/news?category=${type}&page=1&hl=ko_KR`;
+    const category = type === 'news' ? '' : `category=${type}&`;
+    const apiUrl = `https://playeternalreturn.com/api/v1/posts/news?${category}page=1&hl=ko_KR`;
     const { data } = await axios.get(apiUrl);
 
     let newsArray = data.articles;

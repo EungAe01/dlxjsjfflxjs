@@ -79,7 +79,13 @@ function MatchDetail() {
       <h2 className="mb-4">Match Details for Game ID: {gameId}</h2>
       {sortedRanks.map((rank) => (
         <div key={rank} className="mb-4">
-          <h3>#{rank}</h3>
+          <h3>
+            {matchData.userGames[0].matchingMode === 4
+              ? rank === '1'
+                ? '승리'
+                : '패배'
+              : `#${rank}`}
+          </h3>
           {playersByRank[parseInt(rank)].map((player: any) => (
             <div key={player.userNum} className="card mb-3">
               <div className="card-body">

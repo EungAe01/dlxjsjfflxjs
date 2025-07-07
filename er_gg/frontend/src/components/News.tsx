@@ -19,14 +19,15 @@ const News: React.FC = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<
-    'news' | 'patchnote' | 'esports' | 'event' | 'broadcasts'
-  >('news');
+    'all' | 'news' | 'patchnote' | 'esports' | 'event' | 'broadcasts'
+  >('all');
 
   const fetchNews = async () => {
     setLoading(true);
     try {
+      const query = selectedType === 'all' ? '' : `?type=${selectedType}`;
       const response = await axios.get(
-        `${window.location.protocol}//${window.location.hostname}:5000/api/news?type=${selectedType}`
+        `${window.location.protocol}//${window.location.hostname}:5000/api/news${query}`
       );
       setNews(response.data);
       setLoading(false);
@@ -46,8 +47,17 @@ const News: React.FC = () => {
 
   return (
     <div>
-      <h1>Latest News</h1>
+      <h1>최근 소식</h1>
       <ButtonGroup aria-label="뉴스" className="mb-3">
+        <Button
+          variant={selectedType === 'all' ? 'primary' : 'secondary'}
+          onClick={async () => {
+            setSelectedType('all');
+            await fetchNews();
+          }}
+        >
+          전체
+        </Button>
         <Button
           variant={selectedType === 'news' ? 'primary' : 'secondary'}
           onClick={async () => {
@@ -55,7 +65,7 @@ const News: React.FC = () => {
             await fetchNews();
           }}
         >
-          News
+          새소식
         </Button>
         <Button
           variant={selectedType === 'patchnote' ? 'primary' : 'secondary'}
@@ -64,7 +74,7 @@ const News: React.FC = () => {
             await fetchNews();
           }}
         >
-          Patch Notes
+          패치노트
         </Button>
         <Button
           variant={selectedType === 'esports' ? 'primary' : 'secondary'}
@@ -73,7 +83,7 @@ const News: React.FC = () => {
             await fetchNews();
           }}
         >
-          Esports
+          E스포츠
         </Button>
         <Button
           variant={selectedType === 'event' ? 'primary' : 'secondary'}
@@ -82,7 +92,7 @@ const News: React.FC = () => {
             await fetchNews();
           }}
         >
-          Events
+          이벤트
         </Button>
         <Button
           variant={selectedType === 'broadcasts' ? 'primary' : 'secondary'}
@@ -91,7 +101,7 @@ const News: React.FC = () => {
             await fetchNews();
           }}
         >
-          Broadcasts
+          공식 방송
         </Button>
       </ButtonGroup>
       <div className="row">

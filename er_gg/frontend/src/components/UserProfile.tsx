@@ -37,11 +37,24 @@ interface UserGame {
   // Add more fields as needed from the API response
 }
 
+interface UserStats {
+  totalGames: number;
+  totalWins: number;
+  totalTeamKills: number;
+  averageRank: number;
+  averageKills: number;
+  averageAssistants: number;
+  top1: number;
+  top2: number;
+  top3: number;
+}
+
 function UserProfile() {
   const { nickname } = useParams<{ nickname: string }>();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userRank, setUserRank] = useState<UserRank | null>(null);
   const [userGames, setUserGames] = useState<UserGame[]>([]);
+  const [userStats, setUserStats] = useState<UserStats | null>(null); // Add userStats state
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [characterImageUrls, setCharacterImageUrls] = useState<{
@@ -72,6 +85,12 @@ function UserProfile() {
           `${window.location.protocol}//${window.location.hostname}:5000/api/user/${userNum}/rank/${currentSeasonId}/3`
         ); // matchingTeamMode: 1 (Solo)
         setUserRank(rankResponse.data);
+
+        // Fetch user stats using current season ID
+        const statsResponse = await axios.get(
+          `${window.location.protocol}//${window.location.hostname}:5000/api/user/${userNum}/stats/${currentSeasonId}`
+        );
+        setUserStats(statsResponse.data.userStats[0]); // Assuming the first element is the correct one
 
         // Fetch user games
         const gamesResponse = await axios.get(
@@ -123,7 +142,7 @@ function UserProfile() {
       </div>
 
       {userRank && userRank.userRank && (
-        <div className="rank-info-section card mt-4">
+        <div className="rank-info-section card mt-4 w-1/4">
           <div className="card-body">
             <h3 className="card-title">랭크 정보</h3>
             <div className="rank-details">
@@ -146,18 +165,44 @@ function UserProfile() {
         </div>
       )}
 
+      {userStats && (
+        <div className="stats-info-section card mt-4 w-1/4">
+          <div className="card-body">
+            <h3 className="card-title">통계 정보</h3>
+            <div className="stats-details">
+              <p>게임 수: {userStats.totalGames}</p>
+              <p>우승 횟수: {userStats.totalWins}</p>
+              <p>총 TK: {userStats.totalTeamKills}</p>
+              <p>평균 순위: {userStats.averageRank}</p>
+              <p>평균 킬: {userStats.averageKills}</p>
+              <p>평균 어시: {userStats.averageAssistants}</p>
+              <p>승률: {userStats.top1}</p>
+              <p>Top 2: {userStats.top2}</p>
+              <p>Top 3: {userStats.top3}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="recent-games-section card mt-4">
         <div className="card-body">
           <h3 className="card-title">Recent Games</h3>
           {userGames.length > 0 ? (
-            <ul className="list-group">
+            <div className="list-group">
               {userGames.map((game) => (
-                <li
+                <div
                   key={game.gameId}
                   className="list-group-item d-flex justify-content-between align-items-center"
                 >
                   <div className="d-flex align-items-center">
-                    <div>
+                    <div
+                      style={{
+                        width: '60px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'left',
+                      }}
+                    >
                       <div>
                         {game.matchingMode === 6 ? (
                           <span
@@ -175,6 +220,12 @@ function UserProfile() {
                               style={{
                                 fontSize: '1.25rem',
                                 fontWeight: 'bold',
+                                color:
+                                  game.gameRank === 1
+                                    ? 'limegreen'
+                                    : game.gameRank === 2 || game.gameRank === 3
+                                    ? 'deepskyblue'
+                                    : undefined,
                               }}
                             >
                               #{game.gameRank}
@@ -183,7 +234,28 @@ function UserProfile() {
                         )}
                       </div>
                       <div>{PlayModeKR[game.matchingMode]}</div>
-                      <div>{game.startDtm}</div>
+                      <span
+                        style={{
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        {(() => {
+                          const startDate = new Date(game.startDtm);
+                          const now = new Date();
+                          const diffMs = now.getTime() - startDate.getTime();
+                          const diffSec = Math.floor(diffMs / 1000);
+                          if (diffSec < 60) return `${diffSec}초 전`;
+                          const diffMin = Math.floor(diffSec / 60);
+                          if (diffMin < 60) return `${diffMin}분 전`;
+                          const diffHour = Math.floor(diffMin / 60);
+                          if (diffHour < 24) return `${diffHour}시간 전`;
+                          const diffDay = Math.floor(diffHour / 24);
+                          if (diffDay < 7) return `${diffDay}일 전`;
+                          const month = startDate.getMonth() + 1;
+                          const day = startDate.getDate();
+                          return `${month}월 ${day}일`;
+                        })()}
+                      </span>
                     </div>
 
                     {game.characterNum &&
@@ -232,9 +304,9 @@ function UserProfile() {
                   >
                     View Details
                   </Link>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           ) : (
             <p>No recent games found.</p>
           )}
