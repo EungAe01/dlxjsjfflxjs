@@ -1,0 +1,12 @@
+.home-spotlight-card {
+  width: 33%;
+  height: 100%;
+  color: #e8e8e8;
+}
+
+.spotlight-card-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 20px;
+}

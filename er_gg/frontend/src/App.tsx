@@ -14,6 +14,8 @@ import {
   FormControl,
   Button,
 } from 'react-bootstrap';
+import PillNav from './components/PillNav/PillNav';
+import logo from './logo.svg';
 
 function AppNavbar() {
   const [nickname, setNickname] = useState('');
@@ -26,33 +28,25 @@ function AppNavbar() {
   };
   return (
     <>
-      <Navbar bg="dark" variant="dark" expand="lg">
-        <Container>
-          <Navbar.Brand href="/">ER.GG</Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link href="/">홈</Nav.Link>
-              <Nav.Link href="/news">뉴스</Nav.Link>
-              <Nav.Link href="/characters">캐릭터</Nav.Link>
-              <Nav.Link href="/items">아이템</Nav.Link>
-            </Nav>
-            <Form className="d-flex" onSubmit={handleSubmit}>
-              <FormControl
-                type="search"
-                placeholder="닉네임 검색"
-                className="me-2"
-                aria-label="Search"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-              />
-              <Button variant="outline-success" type="submit">
-                검색
-              </Button>
-            </Form>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+      <div>
+        <PillNav
+          logo={logo}
+          logoAlt="Company Logo"
+          items={[
+            { label: 'Home', href: '/' },
+            { label: 'News', href: '/news' },
+            { label: 'Character', href: '/characters' },
+            { label: 'Statistics', href: '/stats' },
+          ]}
+          activeHref={window.location.pathname}
+          className="custom-nav"
+          ease="power2.easeOut"
+          baseColor="#000000"
+          pillColor="#ffffff"
+          hoveredPillTextColor="#ffffff"
+          pillTextColor="#000000"
+        />
+      </div>
     </>
   );
 }

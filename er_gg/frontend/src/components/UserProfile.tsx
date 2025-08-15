@@ -17,7 +17,6 @@ interface UserRank {
     mmr: number;
     nickname: string;
     rank: number;
-    rankPercent: number;
     seasonId: number;
     matchingMode: number;
     matchingTeamMode: number;
@@ -158,7 +157,6 @@ function UserProfile() {
               <div className="rank-text">
                 <p>MMR: {userRank.userRank.mmr}</p>
                 <p>Rank: {userRank.userRank.rank}</p>
-                <p>Rank Percent: {userRank.userRank.rankPercent}</p>
               </div>
             </div>
           </div>
